@@ -11,7 +11,6 @@
   "preview": "vite preview",
   "start": "serve -s dist"
 },
-  },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
     "@prisma/client": "^6.11.1",

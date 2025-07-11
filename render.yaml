@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: nomina-backend
+    env: node
+    plan: free
+    branch: main
+    repo: https://github.com/JoelBarbosa07/nomina_variable
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://db_nomina_variable_user:0iBKf3Jdk4TyAOzdY7tjDOdgldM7uNEO@dpg-d1ojvgc9c44c73fnv360-a.oregon-postgres.render.com/db_nomina_variable
+      - key: PORT
+        value: 3000

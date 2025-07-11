@@ -1,0 +1,99 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                   String         @id @default(uuid())
+  email                String         @unique
+  passwordHash         String
+  name                 String
+  role                 String
+  webhookUrl           String?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  resetToken           String?
+  resetTokenExpiry     DateTime?
+
+  workReports          WorkReport[]
+  userSettings         UserSetting[]
+  chatMessages         ChatMessage[]
+  approvedWorkReports  WorkReport[]   @relation("ApprovedBy")
+  rejectedWorkReports  WorkReport[]   @relation("RejectedBy")
+
+  @@map("users")
+}
+
+model JobType {
+  id                  String         @id
+  name                String
+  defaultHourlyRate   Float
+  createdAt           DateTime       @default(now())
+
+  workReports         WorkReport[]
+
+  @@map("job_types")
+}
+
+model WorkReport {
+  id               String     @id @default(uuid())
+  userId           String
+  jobType          String
+  customJobType    String?
+  eventName        String
+  eventDate        DateTime
+  startTime        DateTime
+  endTime          DateTime
+  location         String?
+  description      String?
+  paymentType      String
+  hourlyRate       Float?
+  fixedRate        Float?
+  hoursWorked      Float
+  calculatedAmount Float
+  status           String     @default("pending")
+  createdBy        String
+  updatedBy        String
+  submittedAt      DateTime   @default(now())
+  approvedAt       DateTime?
+  rejectedAt       DateTime?
+  approvedById     String?
+  rejectedById     String?
+
+  user             User       @relation(fields: [userId], references: [id])
+  jobTypeRef       JobType?   @relation(fields: [jobType], references: [id])
+  approvedBy       User?      @relation("ApprovedBy", fields: [approvedById], references: [id])
+  rejectedBy       User?      @relation("RejectedBy", fields: [rejectedById], references: [id])
+
+  @@map("work_reports")
+}
+
+model UserSetting {
+  id           String    @id @default(uuid())
+  userId       String
+  settingKey   String
+  settingValue String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user         User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, settingKey])
+  @@map("user_settings")
+}
+
+model ChatMessage {
+  id         String    @id @default(uuid())
+  userId     String
+  message    String
+  response   String?
+  createdAt  DateTime  @default(now())
+
+  user       User      @relation(fields: [userId], references: [id])
+
+  @@map("chat_messages")
+}
